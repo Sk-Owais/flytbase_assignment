@@ -1,18 +1,24 @@
 import mongoose, { Types } from "mongoose";
 import userModel from "../models/userModel";
+import droneModel from "../models/droneModel";
 import missionModel from "../models/missionModel";
 import {
   missionCreateParams,
   missionGetAllParams,
   missionUpdateParams,
   missionGetParams,
+  missionAssignDroneParams,
 } from "../interfaces/missionInterfaces";
 import {
   handleServiceError,
   handleResponseHandler,
 } from "../helpers/responseHandler";
 import httpStatusCodes from "../constants/httpsStatusConstant";
-import { USER_MESSAGES, MISSION_MESSAGES } from "../constants/messageConstant";
+import {
+  USER_MESSAGES,
+  MISSION_MESSAGES,
+  DRONE_MESSAGES,
+} from "../constants/messageConstant";
 const { USER_NOT_EXIST } = USER_MESSAGES;
 const {
   MISSION_ALREADY_EXIST_ERROR,
@@ -27,7 +33,12 @@ const {
   MISSION_NOT_EXIST,
   MISSION_UPDATED_ERROR,
   MISSION_UPDATED_SUCCESS,
+  MISSION_ASSIGNED_ERROR,
+  MISSION_ASSIGNED_SUCCESS,
+  MISSION_REMOVED_ERROR,
+  MISSION_REMOVED_SUCCESS,
 } = MISSION_MESSAGES;
+const { DRONE_NOT_EXIST } = DRONE_MESSAGES;
 const { OK, INTERNAL_SERVER_ERROR } = httpStatusCodes;
 
 async function createMissionService(params: missionCreateParams): Promise<any> {
@@ -292,10 +303,155 @@ async function updateMissionService(params: missionUpdateParams): Promise<any> {
   }
 }
 
+async function assignDroneMissionService(
+  params: missionAssignDroneParams
+): Promise<any> {
+  const { drone_id, user_id, mission_id } = params;
+  try {
+    const checkUser = await userModel
+      .findOne({
+        _id: user_id,
+        is_active: true,
+        is_deleted: false,
+      })
+      .lean();
+    if (!checkUser) {
+      return {
+        code: OK.code,
+        response: handleResponseHandler(OK.errorCode, USER_NOT_EXIST),
+      };
+    }
+    const checkMission = await missionModel
+      .findOne({ _id: mission_id, is_active: true, is_deleted: false })
+      .lean();
+    if (!checkMission) {
+      return {
+        code: OK.code,
+        response: handleResponseHandler(OK.errorCode, MISSION_NOT_EXIST),
+      };
+    }
+    const checkDrone = await droneModel
+      .findOne({
+        _id: drone_id,
+        created_by: user_id,
+        is_active: true,
+        is_deleted: false,
+      })
+      .lean();
+    if (!checkDrone) {
+      return {
+        code: OK.code,
+        response: handleResponseHandler(OK.errorCode, DRONE_NOT_EXIST),
+      };
+    }
+    const assignMission = await missionModel
+      .findByIdAndUpdate(
+        mission_id,
+        { $push: { drones: drone_id } },
+        { new: true }
+      )
+      .lean();
+    await droneModel
+      .findByIdAndUpdate(
+        drone_id,
+        { $push: { missions: mission_id } },
+        { new: true }
+      )
+      .lean();
+    return {
+      code: OK.code,
+      response: handleResponseHandler(
+        OK.errorCode,
+        assignMission ? MISSION_ASSIGNED_SUCCESS : MISSION_ASSIGNED_ERROR,
+        !!assignMission,
+        { assignMission }
+      ),
+    };
+  } catch (error: unknown) {
+    return {
+      code: INTERNAL_SERVER_ERROR.code,
+      response: handleServiceError(error),
+    };
+  }
+}
+
+async function removeDroneMissionService(
+  params: missionAssignDroneParams
+): Promise<any> {
+  const { drone_id, user_id, mission_id } = params;
+  try {
+    const checkUser = await userModel
+      .findOne({
+        _id: user_id,
+        is_active: true,
+        is_deleted: false,
+      })
+      .lean();
+    if (!checkUser) {
+      return {
+        code: OK.code,
+        response: handleResponseHandler(OK.errorCode, USER_NOT_EXIST),
+      };
+    }
+    const checkMission = await missionModel
+      .findOne({ _id: mission_id, is_active: true, is_deleted: false })
+      .lean();
+    if (!checkMission) {
+      return {
+        code: OK.code,
+        response: handleResponseHandler(OK.errorCode, MISSION_NOT_EXIST),
+      };
+    }
+    const checkDrone = await droneModel
+      .findOne({
+        _id: drone_id,
+        created_by: user_id,
+        is_active: true,
+        is_deleted: false,
+      })
+      .lean();
+    if (!checkDrone) {
+      return {
+        code: OK.code,
+        response: handleResponseHandler(OK.errorCode, DRONE_NOT_EXIST),
+      };
+    }
+    const assignMission = await missionModel
+      .findByIdAndUpdate(
+        mission_id,
+        { $pull: { drones: drone_id } },
+        { new: true }
+      )
+      .lean();
+    await droneModel
+      .findByIdAndUpdate(
+        drone_id,
+        { $pull: { missions: mission_id } },
+        { new: true }
+      )
+      .lean();
+    return {
+      code: OK.code,
+      response: handleResponseHandler(
+        OK.errorCode,
+        assignMission ? MISSION_ASSIGNED_SUCCESS : MISSION_ASSIGNED_ERROR,
+        !!assignMission,
+        { assignMission }
+      ),
+    };
+  } catch (error: unknown) {
+    return {
+      code: INTERNAL_SERVER_ERROR.code,
+      response: handleServiceError(error),
+    };
+  }
+}
 export {
   createMissionService,
   getAllMissionsService,
   getMissionService,
   deleteMissionService,
   updateMissionService,
+  assignDroneMissionService,
+  removeDroneMissionService
 };

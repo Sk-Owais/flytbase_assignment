@@ -79,4 +79,8 @@ export const MISSION_MESSAGES = {
   MISSION_UPDATED_ERROR: "Error while updating mission",
   MISSION_DELETED_SUCCESS: "Mission deleted successfully",
   MISSION_DELETED_ERROR: "Error while deleting mission",
+  MISSION_ASSIGNED_SUCCESS: "Mission assigned to drone successfully",
+  MISSION_ASSIGNED_ERROR: "Error while assigning mission to drone",
+  MISSION_REMOVED_SUCCESS: "Mission removed from drone successfully",
+  MISSION_REMOVED_ERROR: "Error while removing mission from drone",
 } as const;

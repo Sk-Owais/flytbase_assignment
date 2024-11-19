@@ -25,3 +25,9 @@ export interface missionUpdateParams {
   user_id: string;
   mission_id:string
 }
+
+export interface missionAssignDroneParams {
+  user_id: string;
+  mission_id:string
+  drone_id:string
+}
