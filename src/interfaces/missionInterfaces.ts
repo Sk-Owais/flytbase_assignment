@@ -1,5 +1,6 @@
 export interface missionCreateParams {
   mission_name: string;
+  mission_type:string
   altitude: number;
   speed: number;
   waypoints: { lat: number; lng: number }[];
@@ -17,6 +18,7 @@ export interface missionGetParams {
 
 export interface missionUpdateParams {
   mission_name?: string;
+  mission_type?:string
   altitude?: number;
   speed?: number;
   waypoints?: { lat: number; lng: number }[];

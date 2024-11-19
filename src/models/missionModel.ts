@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, model } from "mongoose";
 
 export interface IMission extends Document {
   mission_name: string;
+  mission_type:string
   altitude: number;
   speed: number;
   waypoints: { lat: number; lng: number }[];
@@ -14,6 +15,10 @@ export interface IMission extends Document {
 const missionSchema: Schema<IMission> = new Schema(
   {
     mission_name: {
+      type: String,
+      required: true,
+    },
+    mission_type: {
       type: String,
       required: true,
     },

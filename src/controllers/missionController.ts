@@ -36,6 +36,14 @@ const createMissionController = async (
           .trim()
           .min(3, { message: "should be minimum 3 characters" })
           .max(200, { message: "should be less than 200 characters" }),
+          mission_type: zod
+          .string({
+            required_error: "is required",
+            invalid_type_error: "should be string",
+          })
+          .trim()
+          .min(3, { message: "should be minimum 3 characters" })
+          .max(200, { message: "should be less than 200 characters" }),
         altitude: zod
           .number({
             required_error: "is required",
@@ -203,6 +211,15 @@ const updateMissionController = async (
     const { error, data } = zod
       .object({
         mission_name: zod
+          .string({
+            required_error: "is required",
+            invalid_type_error: "should be string",
+          })
+          .trim()
+          .min(3, { message: "should be minimum 3 characters" })
+          .max(200, { message: "should be less than 200 characters" })
+          .optional(),
+          mission_type: zod
           .string({
             required_error: "is required",
             invalid_type_error: "should be string",

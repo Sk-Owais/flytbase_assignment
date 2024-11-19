@@ -67,6 +67,13 @@ async function createDroneService(params: droneCreateParams): Promise<any> {
       drone_type,
       created_by: user_id,
     });
+    await userModel
+      .findByIdAndUpdate(
+        user_id,
+        { $push: { drones: createDrone._id } },
+        { new: true }
+      )
+      .lean();
     return {
       code: OK.code,
       response: handleResponseHandler(
@@ -249,6 +256,13 @@ async function deleteDroneService(params: droneGetParams): Promise<any> {
       .findByIdAndUpdate(
         drone_id,
         { is_active: false, is_deleted: true },
+        { new: true }
+      )
+      .lean();
+    await userModel
+      .findByIdAndUpdate(
+        user_id,
+        { $pull: { drones: drone_id } },
         { new: true }
       )
       .lean();

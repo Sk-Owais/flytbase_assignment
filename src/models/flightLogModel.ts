@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, model } from "mongoose";
 
 export interface IFlightLog extends Document {
+  flight_id: string;
   drone_id: mongoose.Types.ObjectId;
   mission_name: string;
   waypoints: { time: number; alt: number; lat: number; lng: number }[];
@@ -14,6 +15,11 @@ export interface IFlightLog extends Document {
 
 const flightLogSchema: Schema<IFlightLog> = new Schema(
   {
+    flight_id: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     drone_id: {
       type: Schema.Types.ObjectId,
       ref: "Drone",
@@ -51,7 +57,7 @@ const flightLogSchema: Schema<IFlightLog> = new Schema(
     missions: { type: [{ type: Schema.Types.ObjectId, ref: "Mission" }] },
   },
   {
-    timestamps: { createdAt: "created_at", updatedAt: "updated_at" }, 
+    timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
     versionKey: false,
   }
 );

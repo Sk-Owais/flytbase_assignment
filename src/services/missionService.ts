@@ -31,7 +31,8 @@ const {
 const { OK, INTERNAL_SERVER_ERROR } = httpStatusCodes;
 
 async function createMissionService(params: missionCreateParams): Promise<any> {
-  const { mission_name, altitude, speed, waypoints, user_id } = params;
+  const { mission_name, altitude, speed, waypoints, user_id, mission_type } =
+    params;
   try {
     const checkUser = await userModel
       .findOne({
@@ -60,11 +61,19 @@ async function createMissionService(params: missionCreateParams): Promise<any> {
     }
     const createMission = await missionModel.create({
       mission_name,
+      mission_type,
       altitude,
       speed,
       waypoints,
       created_by: user_id,
     });
+    await userModel
+      .findByIdAndUpdate(
+        user_id,
+        { $push: { missions: createMission._id } },
+        { new: true }
+      )
+      .lean();
     return {
       code: OK.code,
       response: handleResponseHandler(
@@ -195,10 +204,17 @@ async function deleteMissionService(params: missionGetParams): Promise<any> {
         response: handleResponseHandler(OK.errorCode, MISSION_NOT_EXIST),
       };
     }
-    const deleteDrone = await missionModel
+    const deleteMission = await missionModel
       .findByIdAndUpdate(
         mission_id,
         { is_active: false, is_deleted: true },
+        { new: true }
+      )
+      .lean();
+    await userModel
+      .findByIdAndUpdate(
+        user_id,
+        { $pull: { drones: mission_id } },
         { new: true }
       )
       .lean();
@@ -206,9 +222,9 @@ async function deleteMissionService(params: missionGetParams): Promise<any> {
       code: OK.code,
       response: handleResponseHandler(
         OK.errorCode,
-        deleteDrone ? MISSION_DELETED_SUCCESS : MISSION_DELETED_ERROR,
-        !!deleteDrone,
-        { deleteDrone }
+        deleteMission ? MISSION_DELETED_SUCCESS : MISSION_DELETED_ERROR,
+        !!deleteMission,
+        { deleteMission }
       ),
     };
   } catch (error: unknown) {
@@ -220,8 +236,15 @@ async function deleteMissionService(params: missionGetParams): Promise<any> {
 }
 
 async function updateMissionService(params: missionUpdateParams): Promise<any> {
-  const { mission_name, altitude, speed, waypoints, user_id, mission_id } =
-    params;
+  const {
+    mission_name,
+    altitude,
+    speed,
+    waypoints,
+    user_id,
+    mission_id,
+    mission_type,
+  } = params;
   try {
     const checkUser = await userModel
       .findOne({
@@ -248,7 +271,7 @@ async function updateMissionService(params: missionUpdateParams): Promise<any> {
     const updateMission = await missionModel
       .findByIdAndUpdate(
         mission_id,
-        { mission_name, altitude, speed, waypoints },
+        { mission_name, altitude, speed, waypoints, mission_type },
         { new: true }
       )
       .lean();
