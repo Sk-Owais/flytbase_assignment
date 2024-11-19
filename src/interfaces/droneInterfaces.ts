@@ -14,8 +14,8 @@ export interface droneGetParams {
 }
 
 export interface droneUpdateParams {
-  drone_name: string;
-  drone_type: string;
+  drone_name?: string;
+  drone_type?: string;
   user_id: string;
   drone_id: string;
 }

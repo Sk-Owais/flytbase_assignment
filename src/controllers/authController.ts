@@ -4,15 +4,13 @@ import { userLoginService, userRegisterService } from "../services/authService";
 import {
   handleControllerError,
   handleDataValidation,
-  handleResponseHandler,
 } from "../helpers/responseHandler";
 import httpStatusCodes from "../constants/httpsStatusConstant";
 import {
-  alphaNumericOnlyRegex,
   alphaOnlyRegex,
   numberOnlyRegex,
 } from "../constants/regexConstant";
-const { OK, INTERNAL_SERVER_ERROR, PRECONDITION_FAILED } = httpStatusCodes;
+const {INTERNAL_SERVER_ERROR, PRECONDITION_FAILED } = httpStatusCodes;
 
 const userRegisterController = async (
   req: Request,

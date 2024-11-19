@@ -43,7 +43,12 @@ async function userRegisterService(
         response: handleResponseHandler(OK.errorCode, USER_ALREADY_EXIST_ERROR),
       };
     }
-    const createUser = await userModel.create(params);
+    const createUser = await userModel.create({
+      email,
+      contact,
+      full_name,
+      password,
+    });
     const accessToken = await generateJwtToken(
       {
         user_id: createUser._id,

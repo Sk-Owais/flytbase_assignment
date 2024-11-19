@@ -4,6 +4,7 @@ export interface IDrone extends Document {
   drone_name: string;
   drone_type: string;
   created_by: mongoose.Types.ObjectId;
+  missions?: mongoose.Types.ObjectId[];
   is_active: boolean;
   is_deleted: boolean;
 }
@@ -23,6 +24,7 @@ const droneSchema: Schema<IDrone> = new Schema(
       ref: "User",
       required: true,
     },
+    missions: { type: [{ type: Schema.Types.ObjectId, ref: "Mission" }] },
     is_active: { type: Boolean, default: true },
     is_deleted: { type: Boolean, default: false },
   },

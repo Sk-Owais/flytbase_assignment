@@ -57,11 +57,26 @@ export const DRONE_MESSAGES = {
   DRONE_CREATED_ERROR: "Error while creating drone",
   DRONES_FETCHED_SUCCESS: "All drones fetched successfully",
   DRONES_FETCHED_ERROR: "Error while fetching drones",
-  DRONE_NOT_EXIST:"Drones does not exist",
+  DRONE_NOT_EXIST: "Drones does not exist",
   DRONE_FETCHED_SUCCESS: "Drone fetched successfully",
   DRONE_FETCHED_ERROR: "Error while fetching drone",
   DRONE_UPDATED_SUCCESS: "Drone updated successfully",
   DRONE_UPDATED_ERROR: "Error while updating drone",
   DRONE_DELETED_SUCCESS: "Drone deleted successfully",
-  DRONE_DELETED_ERROR: "Error while deleting drone",
+  DRONE_DELETED_ERROR: "Error while updating drone",
+} as const;
+
+export const MISSION_MESSAGES = {
+  MISSION_ALREADY_EXIST_ERROR: "Mission already exists",
+  MISSION_CREATED_SUCCESS: "Mission created successfully",
+  MISSION_CREATED_ERROR: "Error while creating mission",
+  MISSIONS_FETCHED_SUCCESS: "All missions fetched successfully",
+  MISSIONS_FETCHED_ERROR: "Error while fetching missions",
+  MISSION_NOT_EXIST: "Mission does not exist",
+  MISSION_FETCHED_SUCCESS: "Mission fetched successfully",
+  MISSION_FETCHED_ERROR: "Error while fetching mission",
+  MISSION_UPDATED_SUCCESS: "Mission updated successfully",
+  MISSION_UPDATED_ERROR: "Error while updating mission",
+  MISSION_DELETED_SUCCESS: "Mission deleted successfully",
+  MISSION_DELETED_ERROR: "Error while deleting mission",
 } as const;

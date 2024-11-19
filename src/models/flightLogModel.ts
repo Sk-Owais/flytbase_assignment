@@ -4,6 +4,8 @@ export interface IFlightLog extends Document {
   drone_id: mongoose.Types.ObjectId;
   mission_name: string;
   waypoints: { time: number; alt: number; lat: number; lng: number }[];
+  drones?: mongoose.Types.ObjectId[];
+  missions?: mongoose.Types.ObjectId[];
   speed: number;
   distance: number;
   execution_start: Date;
@@ -45,6 +47,8 @@ const flightLogSchema: Schema<IFlightLog> = new Schema(
       type: Date,
       required: true,
     },
+    drones: { type: [{ type: Schema.Types.ObjectId, ref: "Drone" }] },
+    missions: { type: [{ type: Schema.Types.ObjectId, ref: "Mission" }] },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" }, 

@@ -1,21 +1,26 @@
 import { Request, Response, NextFunction } from "express";
 import zod from "zod";
 import {
-  createDroneService,
-  getAllDronesService,
-  updateDroneService,
-  deleteDroneService,
-  getDroneService,
-} from "../services/droneService";
+  createMissionService,
+  getAllMissionsService,
+  getMissionService,
+  deleteMissionService,
+  updateMissionService
+} from "../services/missionService";
 import {
   handleControllerError,
   handleDataValidation,
   handleResponseHandler,
 } from "../helpers/responseHandler";
 import httpStatusCodes from "../constants/httpsStatusConstant";
+import {
+  alphaNumericOnlyRegex,
+  alphaOnlyRegex,
+  numberOnlyRegex,
+} from "../constants/regexConstant";
 const { INTERNAL_SERVER_ERROR, PRECONDITION_FAILED } = httpStatusCodes;
 
-const createDroneController = async (
+const createMissionController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -23,7 +28,7 @@ const createDroneController = async (
   try {
     const { error, data } = zod
       .object({
-        drone_name: zod
+        mission_name: zod
           .string({
             required_error: "is required",
             invalid_type_error: "should be string",
@@ -31,14 +36,38 @@ const createDroneController = async (
           .trim()
           .min(3, { message: "should be minimum 3 characters" })
           .max(200, { message: "should be less than 200 characters" }),
-        drone_type: zod
-          .string({
+        altitude: zod
+          .number({
             required_error: "is required",
-            invalid_type_error: "should be string",
+            invalid_type_error: "should be number",
           })
-          .trim()
-          .min(3, { message: "should be minimum 3 characters" })
-          .max(200, { message: "should be less than 200 characters" }),
+          .positive({ message: "should be a positive number" }),
+        speed: zod
+          .number({
+            required_error: "is required",
+            invalid_type_error: "should be number",
+          })
+          .positive({ message: "should be a positive number" }),
+        waypoints: zod
+          .array(
+            zod.object({
+              lat: zod
+                .number({
+                  required_error: "is required",
+                  invalid_type_error: "should be number",
+                })
+                .min(-90, { message: "should be between -90 and 90" })
+                .max(90, { message: "should be between -90 and 90" }),
+              lng: zod
+                .number({
+                  required_error: "is required",
+                  invalid_type_error: "should be number",
+                })
+                .min(-180, { message: "should be between -180 and 180" })
+                .max(180, { message: "should be between -180 and 180" }),
+            })
+          )
+          .min(1, { message: "should have at least one waypoint" }),
       })
       .safeParse(req.body);
 
@@ -59,14 +88,14 @@ const createDroneController = async (
       return;
     }
 
-    const { code, response } = await createDroneService({ ...data, user_id });
+    const { code, response } = await createMissionService({ ...data, user_id });
     res.status(code).json(response);
   } catch (error: unknown) {
     res.status(INTERNAL_SERVER_ERROR?.code).json(handleControllerError(error));
   }
 };
 
-const getAllDronesController = async (
+const getAllMissionController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -78,14 +107,14 @@ const getAllDronesController = async (
       return;
     }
 
-    const { code, response } = await getAllDronesService({ user_id });
+    const { code, response } = await getAllMissionsService({ user_id });
     res.status(code).json(response);
   } catch (error: unknown) {
     res.status(INTERNAL_SERVER_ERROR?.code).json(handleControllerError(error));
   }
 };
 
-const getDroneController = async (
+const getMissionController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -93,14 +122,14 @@ const getDroneController = async (
   try {
     const { error, data } = zod
       .object({
-        drone_id: zod
+        mission_id: zod
           .string({
             required_error: "is required",
             invalid_type_error: "should be string",
           })
           .trim(),
       })
-      .safeParse(req.params);
+      .safeParse(req.body);
 
     if (error) {
       res
@@ -118,14 +147,14 @@ const getDroneController = async (
       return;
     }
 
-    const { code, response } = await getDroneService({ ...data, user_id });
+    const { code, response } = await getMissionService({ ...data, user_id });
     res.status(code).json(response);
   } catch (error: unknown) {
     res.status(INTERNAL_SERVER_ERROR?.code).json(handleControllerError(error));
   }
 };
 
-const updateDroneController = async (
+const deleteMissionController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -133,23 +162,91 @@ const updateDroneController = async (
   try {
     const { error, data } = zod
       .object({
-        drone_name: zod
+        mission_id: zod
+          .string({
+            required_error: "is required",
+            invalid_type_error: "should be string",
+          })
+          .trim(),
+      })
+      .safeParse(req.body);
+
+    if (error) {
+      res
+        .status(PRECONDITION_FAILED.code)
+        .json(
+          handleDataValidation(
+            error.issues?.map((i) => `${i.path[0]} ${i.message}`)
+          )
+        );
+      return;
+    }
+    const user_id = req.headers["user_id"];
+    if (typeof user_id !== "string") {
+      res.status(PRECONDITION_FAILED.code).json({ error: PRECONDITION_FAILED });
+      return;
+    }
+
+    const { code, response } = await deleteMissionService({ ...data, user_id });
+    res.status(code).json(response);
+  } catch (error: unknown) {
+    res.status(INTERNAL_SERVER_ERROR?.code).json(handleControllerError(error));
+  }
+};
+
+const updateMissionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { error, data } = zod
+      .object({
+        mission_name: zod
           .string({
             required_error: "is required",
             invalid_type_error: "should be string",
           })
           .trim()
           .min(3, { message: "should be minimum 3 characters" })
-          .max(200, { message: "should be less than 200 characters" }).optional(),
-        drone_type: zod
-          .string({
+          .max(200, { message: "should be less than 200 characters" })
+          .optional(),
+        altitude: zod
+          .number({
             required_error: "is required",
-            invalid_type_error: "should be string",
+            invalid_type_error: "should be number",
           })
-          .trim()
-          .min(3, { message: "should be minimum 3 characters" })
-          .max(200, { message: "should be less than 200 characters" }).optional(),
-        drone_id: zod
+          .positive({ message: "should be a positive number" })
+          .optional(),
+        speed: zod
+          .number({
+            required_error: "is required",
+            invalid_type_error: "should be number",
+          })
+          .positive({ message: "should be a positive number" })
+          .optional(),
+        waypoints: zod
+          .array(
+            zod.object({
+              lat: zod
+                .number({
+                  required_error: "is required",
+                  invalid_type_error: "should be number",
+                })
+                .min(-90, { message: "should be between -90 and 90" })
+                .max(90, { message: "should be between -90 and 90" }),
+              lng: zod
+                .number({
+                  required_error: "is required",
+                  invalid_type_error: "should be number",
+                })
+                .min(-180, { message: "should be between -180 and 180" })
+                .max(180, { message: "should be between -180 and 180" }),
+            })
+          )
+          .min(1, { message: "should have at least one waypoint" })
+          .optional(),
+        mission_id: zod
           .string({
             required_error: "is required",
             invalid_type_error: "should be string",
@@ -175,47 +272,7 @@ const updateDroneController = async (
       return;
     }
 
-    const { code, response } = await updateDroneService({ ...data, user_id });
-    res.status(code).json(response);
-  } catch (error: unknown) {
-    res.status(INTERNAL_SERVER_ERROR?.code).json(handleControllerError(error));
-  }
-};
-
-const deleteDroneController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { error, data } = zod
-      .object({
-        drone_id: zod
-          .string({
-            required_error: "is required",
-            invalid_type_error: "should be string",
-          })
-          .trim(),
-      })
-      .safeParse(req.params);
-
-    if (error) {
-      res
-        .status(PRECONDITION_FAILED.code)
-        .json(
-          handleDataValidation(
-            error.issues?.map((i) => `${i.path[0]} ${i.message}`)
-          )
-        );
-      return;
-    }
-    const user_id = req.headers["user_id"];
-    if (typeof user_id !== "string") {
-      res.status(PRECONDITION_FAILED.code).json({ error: PRECONDITION_FAILED });
-      return;
-    }
-
-    const { code, response } = await deleteDroneService({ ...data, user_id });
+    const { code, response } = await updateMissionService({ ...data, user_id });
     res.status(code).json(response);
   } catch (error: unknown) {
     res.status(INTERNAL_SERVER_ERROR?.code).json(handleControllerError(error));
@@ -223,9 +280,9 @@ const deleteDroneController = async (
 };
 
 export {
-  createDroneController,
-  getAllDronesController,
-  getDroneController,
-  updateDroneController,
-  deleteDroneController,
+  createMissionController,
+  getAllMissionController,
+  getMissionController,
+  deleteMissionController,
+  updateMissionController,
 };
