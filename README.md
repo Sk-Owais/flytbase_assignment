@@ -259,7 +259,33 @@ Make sure you have the following installed:
 
 ## Testing APIs with Postman
 
-You can test all the above APIs using the provided Postman collection. Import the `Flytbase-API-Collection.json` into Postman and send requests to your running server.
+You can test all the above APIs using the provided Postman collection. Import the `Flytbase-API-Collection.json`(link below) into Postman and send requests to your running server.
+
+## How to Use the Postman Collection
+
+### Step 1: Import the Collection
+1. Download the Postman collection file from the following link:
+   [Flytbase API Collection](https://drive.google.com/drive/folders/16LbMrhPlXURc-ArI0Q3ynutVJ9dO6p1Z?usp=sharing)
+   
+2. Open Postman on your system.
+
+3. In the Postman app:
+   - Click on **File** > **Import** or use the **Import** button on the top left of the Postman interface.
+   - Choose the downloaded `Flytbase-API-Collection.json` file to import the collection.
+
+### Step 2: Send Requests
+1. Expand the imported collection in Postman to view all available API endpoints.
+2. Select the desired API request and ensure that the parameters, headers, or body are correctly configured.
+3. Click on the **Send** button to make the API call.
+4. Review the response in Postman to validate functionality.
+
+---
+
+## Features of the Postman Collection
+- **Pre-configured API Requests**: Easily test all available APIs without manual setup.
+- **Customization**: Update request parameters, headers, or body to test specific scenarios.
+- **Easy Integration**: Replace `{{baseURL}}` with your server's base URL for quick setup.
+- **Error Handling**: View detailed responses for debugging and troubleshooting.
 
 ### Notes:
 - Use **JWT tokens** for authentication. Include `Authorization: Bearer <token>` in the headers for all protected routes.
