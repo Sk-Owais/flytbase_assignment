@@ -7,6 +7,7 @@ import {
   deleteMissionController,
   assignDroneMissionController,
   removeDroneMissionController,
+  startMissionController,
 } from "../controllers/missionController";
 import { checkUserAccessToken } from "../middleware/basicMiddleware";
 const route = express.Router();
@@ -19,4 +20,7 @@ route.put("/update/:mission_id", updateMissionController);
 route.delete("/delete/:mission_id", deleteMissionController);
 route.post("/assignDrone/:mission_id", assignDroneMissionController);
 route.post("/removeDrone/:mission_id", removeDroneMissionController);
+route.post("/removeDrone/:mission_id", removeDroneMissionController);
+route.post("/mission/:mission_id/start", startMissionController);
+
 export default route;

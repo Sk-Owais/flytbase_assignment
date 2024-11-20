@@ -1,12 +1,15 @@
 import mongoose, { Schema, Document, model } from "mongoose";
 
 export interface IFlightLog extends Document {
-  flight_id: string;
+  flight_log_id: string;
   drone_id: mongoose.Types.ObjectId;
   mission_name: string;
-  waypoints: { time: number; alt: number; lat: number; lng: number }[];
-  drones?: mongoose.Types.ObjectId[];
-  missions?: mongoose.Types.ObjectId[];
+  waypoints: {
+    time: number;
+    alt: number;
+    lat: number;
+    lng: number;
+  }[];
   speed: number;
   distance: number;
   execution_start: Date;
@@ -15,7 +18,7 @@ export interface IFlightLog extends Document {
 
 const flightLogSchema: Schema<IFlightLog> = new Schema(
   {
-    flight_id: {
+    flight_log_id: {
       type: String,
       required: true,
       unique: true,
@@ -33,17 +36,29 @@ const flightLogSchema: Schema<IFlightLog> = new Schema(
       {
         time: { type: Number, required: true },
         alt: { type: Number, required: true },
-        lat: { type: Number, required: true },
-        lng: { type: Number, required: true },
+        lat: {
+          type: Number,
+          required: true,
+          min: -90,
+          max: 90,
+        },
+        lng: {
+          type: Number,
+          required: true,
+          min: -180,
+          max: 180,
+        },
       },
     ],
     speed: {
       type: Number,
       required: true,
+      min: 0,
     },
     distance: {
       type: Number,
       required: true,
+      min: 0,
     },
     execution_start: {
       type: Date,
@@ -53,8 +68,6 @@ const flightLogSchema: Schema<IFlightLog> = new Schema(
       type: Date,
       required: true,
     },
-    drones: { type: [{ type: Schema.Types.ObjectId, ref: "Drone" }] },
-    missions: { type: [{ type: Schema.Types.ObjectId, ref: "Mission" }] },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
@@ -62,4 +75,4 @@ const flightLogSchema: Schema<IFlightLog> = new Schema(
   }
 );
 
-export default model<IFlightLog>("flightLogs", flightLogSchema);
+export default model<IFlightLog>("flightLog", flightLogSchema);

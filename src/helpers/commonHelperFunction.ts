@@ -2,7 +2,7 @@ import jwt, { SignOptions, VerifyOptions, JwtPayload } from "jsonwebtoken";
 import fs from "fs";
 import path from "path";
 import { JWT } from "../config/config";
-
+import mongoose from "mongoose";
 const privateKEY = fs.readFileSync(
   path.join(__dirname, "../../certs/private.key"),
   "utf8"
@@ -46,13 +46,20 @@ const verifyJwtToken = async (token: string): Promise<JwtPayload | null> => {
       algorithms: [JWT_ALGORITHM as jwt.Algorithm],
     };
 
-    // Explicitly cast the result to JwtPayload type
-    const verifiedToken = jwt.verify(token, publicKEY, verifyOptions) as JwtPayload;
+    const verifiedToken = jwt.verify(
+      token,
+      publicKEY,
+      verifyOptions
+    ) as JwtPayload;
 
-    return verifiedToken;  // This should now be correctly typed as JwtPayload
+    return verifiedToken;
   } catch (e) {
-    return null;  // In case of failure, return null
+    return null;
   }
 };
 
-export { generateJwtToken, verifyJwtToken };
+const generateUniqueId = (): string => {
+  return new mongoose.Types.ObjectId().toString();
+};
+
+export { generateJwtToken, verifyJwtToken, generateUniqueId };

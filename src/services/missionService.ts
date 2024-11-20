@@ -2,12 +2,14 @@ import mongoose, { Types } from "mongoose";
 import userModel from "../models/userModel";
 import droneModel from "../models/droneModel";
 import missionModel from "../models/missionModel";
+import flightLogModel from "../models/flightLogModel";
 import {
   missionCreateParams,
   missionGetAllParams,
   missionUpdateParams,
   missionGetParams,
   missionAssignDroneParams,
+  StartMissionExecutionParams,
 } from "../interfaces/missionInterfaces";
 import {
   handleServiceError,
@@ -446,6 +448,89 @@ async function removeDroneMissionService(
     };
   }
 }
+
+async function startMissionService(
+  params: StartMissionExecutionParams
+): Promise<any> {
+  const { drone_id, user_id, mission_id, flight_log } = params;
+  try {
+    const checkUser = await userModel
+      .findOne({ _id: user_id, is_active: true, is_deleted: false })
+      .lean();
+    if (!checkUser) {
+      return {
+        code: OK.code,
+        response: handleResponseHandler(OK.errorCode, "User does not exist"),
+      };
+    }
+
+    const checkMission = await missionModel
+      .findOne({ _id: mission_id, is_active: true, is_deleted: false })
+      .lean();
+    if (!checkMission) {
+      return {
+        code: OK.code,
+        response: handleResponseHandler(OK.errorCode, "Mission does not exist"),
+      };
+    }
+
+    const checkDrone = await droneModel
+      .findOne({
+        _id: drone_id,
+        created_by: user_id,
+        is_active: true,
+        is_deleted: false,
+      })
+      .lean();
+    if (!checkDrone) {
+      return {
+        code: OK.code,
+        response: handleResponseHandler(
+          OK.errorCode,
+          "Drone does not exist or not assigned to user"
+        ),
+      };
+    }
+
+    const newFlightLog = new flightLogModel({
+      flight_id: new Date().toISOString(),
+      mission_name: checkMission.mission_name,
+      drone_id,
+      waypoints: [
+        {
+          time: 0,
+          lat: flight_log.initial_position.lat,
+          lng: flight_log.initial_position.lng,
+          alt: flight_log.initial_position.alt,
+        },
+      ],
+      speed: flight_log.speed,
+      distance: 0,
+      execution_start: flight_log.start_time,
+      execution_end: null,
+      drones: [drone_id],
+      missions: [mission_id],
+    });
+
+    await newFlightLog.save();
+
+    return {
+      code: OK.code,
+      response: handleResponseHandler(
+        OK.errorCode,
+        "Mission started successfully",
+        true,
+        { flightLogId: newFlightLog._id }
+      ),
+    };
+  } catch (error) {
+    return {
+      code: INTERNAL_SERVER_ERROR.code,
+      response: handleServiceError(error),
+    };
+  }
+}
+
 export {
   createMissionService,
   getAllMissionsService,
@@ -453,5 +538,6 @@ export {
   deleteMissionService,
   updateMissionService,
   assignDroneMissionService,
-  removeDroneMissionService
+  removeDroneMissionService,
+  startMissionService,
 };
