@@ -25,7 +25,7 @@ Make sure you have the following installed:
 1. Clone this repository:
 
    ```bash
-   git clone https://github.com/your-username/flytbase_assignment.git
+   git clone https://github.com/Sk-Owais/flytbase_assignment
    cd flytbase_assignment
    ```
 
