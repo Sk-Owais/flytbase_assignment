@@ -14,6 +14,20 @@ This project is a backend service for managing users, drones, missions, and flig
 - **Postman collection** for testing APIs.
 - **PDF generation** for flight logs.
 
+## Tech Stack
+
+- **Node.js** - JavaScript runtime used to build the backend.
+- **TypeScript** - Superset of JavaScript that adds type safety.
+- **Express.js** - Web framework to build the REST API.
+- **MongoDB** - NoSQL database for storing users, drones, missions, and flight logs.
+- **Mongoose** - ODM (Object Data Modeling) library to interact with MongoDB.
+- **JWT** - JSON Web Tokens for authentication and authorization.
+- **Zod** - Schema validation library for validating and parsing request data.
+- **pdfkit** - Library for generating PDF files for flight logs (bonus).
+- **pnpm** - Package manager to handle dependencies.
+- **dotenv** - Module for managing environment variables securely.
+- **nodemon** - Tool for automatically restarting the server during development.
+
 ## Prerequisites
 
 Make sure you have the following installed:
