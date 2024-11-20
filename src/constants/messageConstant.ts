@@ -92,4 +92,7 @@ export const MISSION_MESSAGES = {
 
 export const FLIGHT_MESSAGES = {
   FLIGHT_NOT_EXIST: "Flight logs does not exist",
+  FLIGHT_FETCHED_SUCCESS: "Flight fetched successfully",
+  FLIGHT_FETCHED_ERROR: "Error while fetching flight",
+  FLIGHT_PDF_GENERATED_SUCCESS: "PDF generated successfully",
 } as const;

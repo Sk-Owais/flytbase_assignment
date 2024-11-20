@@ -4,7 +4,7 @@ function calculateDistance(
   lat2: number,
   lon2: number
 ): number {
-  const R = 6371; // Earth's radius in km
+  const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -14,24 +14,21 @@ function calculateDistance(
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Distance in km
+  return R * c;
 }
 
-// Function to calculate the time to travel between two waypoints based on distance and speed
 function calculateTimeToTravel(distance: number, speed: number): number {
-  const timeInSeconds = distance / speed; // Assuming speed is in meters per second
-  return timeInSeconds * 1000; // Convert to milliseconds
+  const timeInSeconds = distance / speed;
+  return timeInSeconds * 1000;
 }
 
 function getCurrentPosition(): { lat: number; lng: number; alt: number } {
-  // Simulate random position within a range (e.g., around a specific location)
-  const lat = 37.7749 + (Math.random() - 0.5) * 0.01; // San Francisco area (latitude)
-  const lng = -122.4194 + (Math.random() - 0.5) * 0.01; // San Francisco area (longitude)
-  const alt = Math.floor(Math.random() * 200); // Random altitude (0 to 200 meters)
+  const lat = 37.7749 + (Math.random() - 0.5) * 0.01;
+  const lng = -122.4194 + (Math.random() - 0.5) * 0.01;
+  const alt = Math.floor(Math.random() * 200);
   return { lat, lng, alt };
 }
 
-// Function to calculate the total distance between waypoints
 function calculateTotalDistance(
   waypoints: { lat: number; lng: number }[]
 ): number {
@@ -41,7 +38,6 @@ function calculateTotalDistance(
     const prevWaypoint = waypoints[i - 1];
     const currentWaypoint = waypoints[i];
 
-    // Calculate distance between two consecutive waypoints
     totalDistance += calculateDistance(
       prevWaypoint.lat,
       prevWaypoint.lng,
@@ -50,7 +46,7 @@ function calculateTotalDistance(
     );
   }
 
-  return totalDistance; // Return distance in kilometers
+  return totalDistance;
 }
 
 export {

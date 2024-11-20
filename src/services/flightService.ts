@@ -9,8 +9,14 @@ import {
   handleResponseHandler,
 } from "../helpers/responseHandler";
 import httpStatusCodes from "../constants/httpsStatusConstant";
-import { USER_MESSAGES } from "../constants/messageConstant";
+import { USER_MESSAGES, FLIGHT_MESSAGES } from "../constants/messageConstant";
 const { USER_NOT_EXIST } = USER_MESSAGES;
+const {
+  FLIGHT_FETCHED_ERROR,
+  FLIGHT_FETCHED_SUCCESS,
+  FLIGHT_NOT_EXIST,
+  FLIGHT_PDF_GENERATED_SUCCESS,
+} = FLIGHT_MESSAGES;
 const { OK, INTERNAL_SERVER_ERROR } = httpStatusCodes;
 
 const generateFlightPDFService = async ({
@@ -37,33 +43,28 @@ const generateFlightPDFService = async ({
       };
     }
 
-    // Fetch the flight log from the database using the flight_id
     const flightLog = await flightLogModel
       .findOne({ flight_log_id: flight_id })
-      .populate("drone_id") // Optionally populate drone data if needed
+      .populate("drone_id")
       .lean();
 
     if (!flightLog) {
       return {
-        code: 404, // Flight log not found
-        response: handleResponseHandler(OK.errorCode, "Flight log not found"),
+        code: 404,
+        response: handleResponseHandler(OK.errorCode, FLIGHT_NOT_EXIST),
       };
     }
 
-    // Generate the PDF
     const doc = new PDFDocument();
     const filePath = `./flight_logs/flight_log_${flight_id}.pdf`;
 
-    // Pipe the PDF output to a file
     doc.pipe(fs.createWriteStream(filePath));
 
-    // Add PDF content - Flight Log Details
     doc
       .fontSize(18)
       .text(`Flight Log for Flight ID: ${flight_id}`, { align: "center" });
     doc.moveDown();
 
-    // Mission Name and Details
     doc.fontSize(14).text(`Mission Name: ${flightLog.mission_name}`);
     doc.text(`Speed: ${flightLog.speed} km/h`);
     doc.text(`Distance: ${flightLog.distance} meters`);
@@ -71,7 +72,6 @@ const generateFlightPDFService = async ({
     doc.text(`Execution End: ${flightLog.execution_end || "Not ended yet"}`);
     doc.moveDown();
 
-    // Add Waypoints
     doc.fontSize(12).text("Waypoints:");
     flightLog.waypoints.forEach((waypoint: any, index: number) => {
       doc.text(
@@ -82,24 +82,67 @@ const generateFlightPDFService = async ({
     });
     doc.moveDown();
 
-    // Finalize the document
     doc.end();
 
-    // Return file path after the PDF is generated
     return {
-      code: 200, // Success
+      code: 200,
       response: handleResponseHandler(
         OK.errorCode,
-        "PDF Generated Successfully"
+        FLIGHT_PDF_GENERATED_SUCCESS
       ),
       filePath,
     };
   } catch (error: unknown) {
     return {
-      code: 500, // Internal server error
+      code: 500,
       response: handleServiceError(error),
     };
   }
 };
 
-export { generateFlightPDFService };
+const fetchFlightPDFService = async ({
+  flight_id,
+  user_id,
+}: generatePDFParams): Promise<{
+  code: number;
+  response: any;
+  filePath?: string;
+}> => {
+  try {
+    const checkUser = await userModel
+      .findOne({
+        _id: user_id,
+        is_active: true,
+        is_deleted: false,
+      })
+      .lean();
+
+    if (!checkUser) {
+      return {
+        code: 404,
+        response: handleResponseHandler(OK.errorCode, USER_NOT_EXIST),
+      };
+    }
+
+    const flightLog = await flightLogModel
+      .findOne({ flight_log_id: flight_id })
+      .populate("drone_id")
+      .lean();
+    return {
+      code: OK.code,
+      response: handleResponseHandler(
+        OK.errorCode,
+        flightLog ? FLIGHT_FETCHED_SUCCESS : FLIGHT_FETCHED_ERROR,
+        !!flightLog,
+        { flightLog }
+      ),
+    };
+  } catch (error: unknown) {
+    return {
+      code: 500,
+      response: handleServiceError(error),
+    };
+  }
+};
+
+export { generateFlightPDFService, fetchFlightPDFService };
