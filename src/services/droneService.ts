@@ -66,6 +66,7 @@ async function createDroneService(params: droneCreateParams): Promise<any> {
       drone_name,
       drone_type,
       created_by: user_id,
+      status:"available"
     });
     await userModel
       .findByIdAndUpdate(
