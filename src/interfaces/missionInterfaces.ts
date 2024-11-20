@@ -1,9 +1,8 @@
 export interface missionCreateParams {
   mission_name: string;
   mission_type: string;
-  altitude: number;
   speed: number;
-  waypoints: { lat: number; lng: number }[];
+  waypoints: { lat: number; lng: number; alt?: number }[];
   user_id: string;
 }
 
@@ -19,9 +18,8 @@ export interface missionGetParams {
 export interface missionUpdateParams {
   mission_name?: string;
   mission_type?: string;
-  altitude?: number;
   speed?: number;
-  waypoints?: { lat: number; lng: number }[];
+  waypoints?: { lat?: number; lng?: number; alt?: number }[];
   user_id: string;
   mission_id: string;
 }
@@ -41,4 +39,11 @@ export interface StartMissionExecutionParams {
     speed: number;
     start_time: Date;
   };
+}
+
+export interface StopMissionExecutionParams {
+  mission_id: string;
+  flight_log_id: string;
+  user_id: string;
+  drone_id:string
 }

@@ -83,4 +83,13 @@ export const MISSION_MESSAGES = {
   MISSION_ASSIGNED_ERROR: "Error while assigning mission to drone",
   MISSION_REMOVED_SUCCESS: "Mission removed from drone successfully",
   MISSION_REMOVED_ERROR: "Error while removing mission from drone",
+  MISSION_STARTED_SUCCESS: "Mission strated successfully",
+  MISSION_STARTED_ERROR: "Error while starting mission",
+  MISSION_NOT_ASSIGNED_ERROR: "MIssion is not assigned to drone",
+  MISSION_STOPPED_SUCCESS: "Mission strated successfully",
+  MISSION_STOPPED_ERROR: "Error while starting mission",
+} as const;
+
+export const FLIGHT_MESSAGES = {
+  FLIGHT_NOT_EXIST: "Flight logs does not exist",
 } as const;

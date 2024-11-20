@@ -3,13 +3,13 @@ import mongoose, { Schema, Document, model } from "mongoose";
 export interface IMission extends Document {
   mission_name: string;
   mission_type:string
-  altitude: number;
   speed: number;
-  waypoints: { lat: number; lng: number }[];
+  waypoints: { lat: number; lng: number, alt?:number }[];
   drones?: mongoose.Types.ObjectId[];
   created_by: mongoose.Types.ObjectId;
   is_active: boolean;
   is_deleted: boolean;
+  status?:string
 }
 
 const missionSchema: Schema<IMission> = new Schema(
@@ -22,18 +22,18 @@ const missionSchema: Schema<IMission> = new Schema(
       type: String,
       required: true,
     },
-    altitude: {
-      type: Number,
-      required: true,
-    },
     speed: {
       type: Number,
       required: true,
+    },
+    status:{
+      type:String,
     },
     waypoints: [
       {
         lat: { type: Number, required: true },
         lng: { type: Number, required: true },
+        alt: { type: Number, default: 0 },
       },
     ],
     drones: { type: [{ type: Schema.Types.ObjectId, ref: "Drone" }] },

@@ -13,7 +13,7 @@ export interface IFlightLog extends Document {
   speed: number;
   distance: number;
   execution_start: Date;
-  execution_end: Date;
+  execution_end: Date | null;
 }
 
 const flightLogSchema: Schema<IFlightLog> = new Schema(
@@ -66,7 +66,7 @@ const flightLogSchema: Schema<IFlightLog> = new Schema(
     },
     execution_end: {
       type: Date,
-      required: true,
+      default: null,
     },
   },
   {

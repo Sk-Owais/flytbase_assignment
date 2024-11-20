@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, model } from "mongoose";
 export interface IDrone extends Document {
   drone_name: string;
   drone_type: string;
+  status?:string
   created_by: mongoose.Types.ObjectId;
   missions?: mongoose.Types.ObjectId[];
   is_active: boolean;
@@ -18,6 +19,9 @@ const droneSchema: Schema<IDrone> = new Schema(
     drone_type: {
       type: String,
       required: true,
+    },
+    status:{
+      type:String,
     },
     created_by: {
       type: Schema.Types.ObjectId,

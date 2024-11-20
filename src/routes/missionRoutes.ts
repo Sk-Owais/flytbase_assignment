@@ -6,6 +6,7 @@ import {
   updateMissionController,
   deleteMissionController,
   assignDroneMissionController,
+  stopMissionController,
   removeDroneMissionController,
   startMissionController,
 } from "../controllers/missionController";
@@ -20,7 +21,7 @@ route.put("/update/:mission_id", updateMissionController);
 route.delete("/delete/:mission_id", deleteMissionController);
 route.post("/assignDrone/:mission_id", assignDroneMissionController);
 route.post("/removeDrone/:mission_id", removeDroneMissionController);
-route.post("/removeDrone/:mission_id", removeDroneMissionController);
 route.post("/mission/:mission_id/start", startMissionController);
+route.post("/mission/:mission_id/stop", stopMissionController);
 
 export default route;

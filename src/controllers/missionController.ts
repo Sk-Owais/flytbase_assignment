@@ -9,6 +9,7 @@ import {
   assignDroneMissionService,
   removeDroneMissionService,
   startMissionService,
+  stopMissionService,
 } from "../services/missionService";
 import {
   handleControllerError,
@@ -47,12 +48,6 @@ const createMissionController = async (
           .trim()
           .min(3, { message: "should be minimum 3 characters" })
           .max(200, { message: "should be less than 200 characters" }),
-        altitude: zod
-          .number({
-            required_error: "is required",
-            invalid_type_error: "should be number",
-          })
-          .positive({ message: "should be a positive number" }),
         speed: zod
           .number({
             required_error: "is required",
@@ -76,6 +71,14 @@ const createMissionController = async (
                 })
                 .min(-180, { message: "should be between -180 and 180" })
                 .max(180, { message: "should be between -180 and 180" }),
+              alt: zod
+                .number({
+                  required_error: "is required",
+                  invalid_type_error: "should be number",
+                })
+                .min(-180, { message: "should be between -180 and 180" })
+                .max(180, { message: "should be between -180 and 180" })
+                .optional(),
             })
           )
           .min(1, { message: "should have at least one waypoint" }),
@@ -231,13 +234,6 @@ const updateMissionController = async (
           .min(3, { message: "should be minimum 3 characters" })
           .max(200, { message: "should be less than 200 characters" })
           .optional(),
-        altitude: zod
-          .number({
-            required_error: "is required",
-            invalid_type_error: "should be number",
-          })
-          .positive({ message: "should be a positive number" })
-          .optional(),
         speed: zod
           .number({
             required_error: "is required",
@@ -254,14 +250,24 @@ const updateMissionController = async (
                   invalid_type_error: "should be number",
                 })
                 .min(-90, { message: "should be between -90 and 90" })
-                .max(90, { message: "should be between -90 and 90" }),
+                .max(90, { message: "should be between -90 and 90" })
+                .optional(),
               lng: zod
                 .number({
                   required_error: "is required",
                   invalid_type_error: "should be number",
                 })
                 .min(-180, { message: "should be between -180 and 180" })
-                .max(180, { message: "should be between -180 and 180" }),
+                .max(180, { message: "should be between -180 and 180" })
+                .optional(),
+              alt: zod
+                .number({
+                  required_error: "is required",
+                  invalid_type_error: "should be number",
+                })
+                .min(-180, { message: "should be between -180 and 180" })
+                .max(180, { message: "should be between -180 and 180" })
+                .optional(),
             })
           )
           .min(1, { message: "should have at least one waypoint" })
@@ -475,7 +481,7 @@ const startMissionController = async (
         .status(PRECONDITION_FAILED.code)
         .json(
           handleDataValidation(
-            error.issues?.map((i) => `${i.path[0]} ${i.message}`)
+            error.issues?.map((i) => `${i.path.join(".")} ${i.message}`)
           )
         );
       return;
@@ -494,7 +500,73 @@ const startMissionController = async (
 
     res.status(code).json(response);
   } catch (error: unknown) {
-    res.status(INTERNAL_SERVER_ERROR?.code).json(handleControllerError(error));
+    res.status(INTERNAL_SERVER_ERROR.code).json(handleControllerError(error));
+  }
+};
+
+const stopMissionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { error, data } = zod
+      .object({
+        mission_id: zod
+          .string({
+            required_error: "Mission ID is required",
+            invalid_type_error: "Mission ID must be a string",
+          })
+          .regex(
+            /^[a-fA-F0-9]{24}$/,
+            "Mission ID must be a valid MongoDB ObjectId"
+          ),
+          drone_id: zod
+          .string({
+            required_error: "Mission ID is required",
+            invalid_type_error: "Mission ID must be a string",
+          })
+          .regex(
+            /^[a-fA-F0-9]{24}$/,
+            "Mission ID must be a valid MongoDB ObjectId"
+          ),
+        flight_log_id: zod
+          .string({
+            required_error: "Flight Log ID is required",
+            invalid_type_error: "Flight Log ID must be a string",
+          })
+          .regex(
+            /^[a-fA-F0-9]{24}$/,
+            "Flight Log ID must be a valid MongoDB ObjectId"
+          ),
+      })
+      .safeParse({ ...req.body, ...req.params });
+
+    if (error) {
+      res
+        .status(PRECONDITION_FAILED.code)
+        .json(
+          handleDataValidation(
+            error.issues?.map((i) => `${i.path[0]} ${i.message}`)
+          )
+        );
+      return;
+    }
+
+    const user_id = req.headers["user_id"];
+    if (typeof user_id !== "string") {
+      res.status(PRECONDITION_FAILED.code).json({ error: PRECONDITION_FAILED });
+      return;
+    }
+
+    const { code, response } = await stopMissionService({
+      ...data,
+      user_id,
+    });
+
+    res.status(code).json(response);
+  } catch (error: unknown) {
+    res.status(INTERNAL_SERVER_ERROR.code).json(handleControllerError(error));
   }
 };
 
@@ -503,6 +575,7 @@ export {
   getAllMissionController,
   getMissionController,
   deleteMissionController,
+  stopMissionController,
   updateMissionController,
   assignDroneMissionController,
   removeDroneMissionController,
