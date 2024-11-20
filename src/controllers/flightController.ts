@@ -43,7 +43,7 @@ const generateFlightPDFController = async (
     }
 
     const { code, response } = await generateFlightPDFService({
-        ...data, // contains flight_id
+        ...data,
         user_id,
       });
     res.status(code).json(response);

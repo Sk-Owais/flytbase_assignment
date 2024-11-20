@@ -5,13 +5,14 @@ This project is a backend service for managing users, drones, missions, and flig
 
 ## Features
 
+- **APIS Validation** using Zod.
 - **User Authentication** using JWT.
 - **CRUD operations** for drones and missions.
 - **Mission Execution Simulation** to simulate the drone's movement along the mission waypoints.
 - **Flight Log** generation and storage.
 - **API for Assigning and Removing Missions from Drones.**
 - **Postman collection** for testing APIs.
-- **PDF generation** for flight logs (bonus).
+- **PDF generation** for flight logs.
 
 ## Prerequisites
 
@@ -250,12 +251,7 @@ You can test all the above APIs using the provided Postman collection. Import th
 - Use **JWT tokens** for authentication. Include `Authorization: Bearer <token>` in the headers for all protected routes.
 - Make sure MongoDB is running on `localhost:27017` or update `.env` with the correct MongoDB URI.
 
-## Bonus Features
-
-1. Dockerize the application for easy deployment. Follow the `Dockerfile` for building the Docker image.
-2. Generate a PDF for flight log data using the `pdfkit` library.
-
-## Docker Setup (Bonus)
+## Docker Setup
 
 To dockerize the application, build the Docker image:
 

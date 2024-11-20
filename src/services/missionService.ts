@@ -483,7 +483,6 @@ async function startMissionService(
       };
     }
 
-    // Verify drone exists and is assigned to the user
     const checkDrone = await droneModel
       .findOne({
         _id: drone_id,
@@ -503,7 +502,6 @@ async function startMissionService(
       };
     }
 
-    // Create a new flight log entry
     const newFlightLog = new flightLogModel({
       flight_log_id: generateUniqueId(),
       mission_name: checkMission.mission_name,
@@ -524,39 +522,32 @@ async function startMissionService(
 
     const savedFlightLog = await newFlightLog.save();
 
-    // Simulate the drone's movement along the waypoints
-    let currentTime = new Date(flight_log.start_time); // Starting time
+    let currentTime = new Date(flight_log.start_time);
     let currentPosition = {
       lat: flight_log.initial_position.lat,
       lng: flight_log.initial_position.lng,
       alt: flight_log.initial_position.alt,
     };
 
-    // Loop over waypoints and simulate movement
     for (let i = 1; i < checkMission.waypoints.length; i++) {
       const startPoint = checkMission.waypoints[i - 1];
       const endPoint = checkMission.waypoints[i];
 
-      // Calculate distance and travel time between waypoints
       const distance = calculateDistance(
         startPoint.lat,
         startPoint.lng,
         endPoint.lat,
         endPoint.lng
       );
-      const travelTime = calculateTimeToTravel(distance, flight_log.speed); // In milliseconds
+      const travelTime = calculateTimeToTravel(distance, flight_log.speed);
 
-      // Update the current time and position
-      currentTime.setTime(currentTime.getTime() + travelTime); // Add travel time to current time
+      currentTime.setTime(currentTime.getTime() + travelTime);
       currentPosition = {
         lat: endPoint.lat,
         lng: endPoint.lng,
-        alt: endPoint.alt || 0, // Provide default value for altitude if missing
+        alt: endPoint.alt || 0,
       };
 
-      // Log the new position and timestamp
-      // Ensure endPoint has `alt` safely
-      // Log the new position and timestamp
       await flightLogModel.findByIdAndUpdate(
         savedFlightLog._id,
         {
@@ -565,7 +556,7 @@ async function startMissionService(
               time: currentTime,
               lat: currentPosition.lat,
               lng: currentPosition.lng,
-              alt: endPoint.alt !== undefined ? endPoint.alt : 0, // Provide default if missing
+              alt: endPoint.alt !== undefined ? endPoint.alt : 0,
             },
           },
         },
@@ -612,7 +603,6 @@ async function stopMissionService(
   const { mission_id, flight_log_id, user_id, drone_id } = params;
 
   try {
-    // Verify user exists and is active
     const checkUser = await userModel
       .findOne({ _id: user_id, is_active: true, is_deleted: false })
       .lean();
@@ -623,7 +613,6 @@ async function stopMissionService(
       };
     }
 
-    // Verify drone status and ownership
     const checkDrone = await droneModel
       .findOne({
         _id: drone_id,
@@ -643,7 +632,6 @@ async function stopMissionService(
       };
     }
 
-    // Verify mission exists
     const checkMission = await missionModel
       .findOne({ _id: mission_id, is_active: true, is_deleted: false })
       .lean();
@@ -654,7 +642,6 @@ async function stopMissionService(
       };
     }
 
-    // Verify flight log belongs to mission
     const checkFlightLog = await flightLogModel
       .findOne({ _id: flight_log_id, mission_id })
       .lean();
@@ -665,7 +652,6 @@ async function stopMissionService(
       };
     }
 
-    // Update the flight log with execution end time
     const updatedFlightLog = await flightLogModel
       .findByIdAndUpdate(
         flight_log_id,
@@ -681,18 +667,18 @@ async function stopMissionService(
       };
     }
 
-    // Calculate total distance, time, and average speed
-    const totalDistance = calculateTotalDistance(updatedFlightLog.waypoints.map(waypoint => ({
-      lat: waypoint.lat,
-      lng: waypoint.lng // Ensure you're using `lng` here
-    })));
+    const totalDistance = calculateTotalDistance(
+      updatedFlightLog.waypoints.map((waypoint) => ({
+        lat: waypoint.lat,
+        lng: waypoint.lng,
+      }))
+    );
     const totalTime =
       (new Date().getTime() -
         new Date(updatedFlightLog.execution_start).getTime()) /
-      1000; // in seconds
-    const averageSpeed = totalDistance / totalTime; // in meters per second
+      1000;
+    const averageSpeed = totalDistance / totalTime;
 
-    // Update the flight log with the stats
     await flightLogModel.findByIdAndUpdate(
       updatedFlightLog._id,
       {
@@ -706,8 +692,7 @@ async function stopMissionService(
       { new: true }
     );
 
-    // Save final position to flight log (assuming current position is available)
-    const currentPosition = getCurrentPosition(); // Implement this based on your application context
+    const currentPosition = getCurrentPosition();
     await flightLogModel.findByIdAndUpdate(
       updatedFlightLog._id,
       {
@@ -723,7 +708,6 @@ async function stopMissionService(
       { new: true }
     );
 
-    // Update mission status to "ended"
     await missionModel
       .findByIdAndUpdate(
         mission_id,
@@ -732,7 +716,6 @@ async function stopMissionService(
       )
       .lean();
 
-    // Update drone status to "available"
     await droneModel
       .findByIdAndUpdate(
         drone_id,
@@ -741,7 +724,6 @@ async function stopMissionService(
       )
       .lean();
 
-    // Remove drone from the mission's drones array
     await missionModel
       .findByIdAndUpdate(
         mission_id,
