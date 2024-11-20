@@ -83,16 +83,16 @@ export const MISSION_MESSAGES = {
   MISSION_ASSIGNED_ERROR: "Error while assigning mission to drone",
   MISSION_REMOVED_SUCCESS: "Mission removed from drone successfully",
   MISSION_REMOVED_ERROR: "Error while removing mission from drone",
-  MISSION_STARTED_SUCCESS: "Mission strated successfully",
+  MISSION_STARTED_SUCCESS: "Mission started successfully",
   MISSION_STARTED_ERROR: "Error while starting mission",
   MISSION_NOT_ASSIGNED_ERROR: "MIssion is not assigned to drone",
-  MISSION_STOPPED_SUCCESS: "Mission strated successfully",
-  MISSION_STOPPED_ERROR: "Error while starting mission",
+  MISSION_STOPPED_SUCCESS: "Mission stopped successfully",
+  MISSION_STOPPED_ERROR: "Error while stoping mission",
 } as const;
 
 export const FLIGHT_MESSAGES = {
   FLIGHT_NOT_EXIST: "Flight logs does not exist",
   FLIGHT_FETCHED_SUCCESS: "Flight fetched successfully",
   FLIGHT_FETCHED_ERROR: "Error while fetching flight",
-  FLIGHT_PDF_GENERATED_SUCCESS: "PDF generated successfully",
+  FLIGHT_PDF_GENERATED_SUCCESS: "PDF generated successfully. Please find it in service folder",
 } as const;

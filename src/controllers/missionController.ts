@@ -143,7 +143,7 @@ const getMissionController = async (
           })
           .trim(),
       })
-      .safeParse(req.body);
+      .safeParse(req.params);
 
     if (error) {
       res
@@ -183,7 +183,7 @@ const deleteMissionController = async (
           })
           .trim(),
       })
-      .safeParse(req.body);
+      .safeParse(req.params);
 
     if (error) {
       res
@@ -466,11 +466,10 @@ const startMissionController = async (
               })
               .min(0, "Speed cannot be negative"),
             start_time: zod
-              .date({
+              .string({
                 required_error: "Start time is required",
                 invalid_type_error: "Start time should be a valid date",
               })
-              .min(new Date(), "Start time must be in the future"),
           })
           .required(),
       })

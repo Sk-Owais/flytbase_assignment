@@ -37,7 +37,7 @@ export interface StartMissionExecutionParams {
   flight_log: {
     initial_position: { lat: number; lng: number; alt: number };
     speed: number;
-    start_time: Date;
+    start_time: string;
   };
 }
 

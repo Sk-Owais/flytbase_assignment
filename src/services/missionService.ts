@@ -619,7 +619,7 @@ async function stopMissionService(
         created_by: user_id,
         is_active: true,
         is_deleted: false,
-        status: "in use",
+        status: "available",
       })
       .lean();
     if (!checkDrone) {
@@ -643,8 +643,8 @@ async function stopMissionService(
     }
 
     const checkFlightLog = await flightLogModel
-      .findOne({ _id: flight_log_id, mission_id })
-      .lean();
+    .findOne({ flight_log_id })
+    .lean();
     if (!checkFlightLog) {
       return {
         code: OK.code,
@@ -653,12 +653,12 @@ async function stopMissionService(
     }
 
     const updatedFlightLog = await flightLogModel
-      .findByIdAndUpdate(
-        flight_log_id,
-        { $set: { execution_end: new Date() } },
-        { new: true }
-      )
-      .lean();
+    .findOneAndUpdate(
+      { flight_log_id },
+      { $set: { execution_end: new Date() } },
+      { new: true }
+    )
+    .lean();
 
     if (!updatedFlightLog) {
       return {

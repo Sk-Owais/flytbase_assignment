@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import userModel from "../models/userModel";
 import flightLogModel from "../models/flightLogModel";
 import PDFDocument from "pdfkit";
+import path from "path";
 import fs from "fs";
 import { generatePDFParams } from "../interfaces/flightInterfaces";
 import {
@@ -45,7 +46,6 @@ const generateFlightPDFService = async ({
 
     const flightLog = await flightLogModel
       .findOne({ flight_log_id: flight_id })
-      .populate("drone_id")
       .lean();
 
     if (!flightLog) {
@@ -55,8 +55,13 @@ const generateFlightPDFService = async ({
       };
     }
 
+    const directoryPath = path.join(__dirname, "flight_logs");
+    if (!fs.existsSync(directoryPath)) {
+      fs.mkdirSync(directoryPath, { recursive: true });
+    }
+
+    const filePath = path.join(directoryPath, `flight_log_${flight_id}.pdf`);
     const doc = new PDFDocument();
-    const filePath = `./flight_logs/flight_log_${flight_id}.pdf`;
 
     doc.pipe(fs.createWriteStream(filePath));
 
@@ -100,6 +105,7 @@ const generateFlightPDFService = async ({
   }
 };
 
+
 const fetchFlightPDFService = async ({
   flight_id,
   user_id,
@@ -126,7 +132,6 @@ const fetchFlightPDFService = async ({
 
     const flightLog = await flightLogModel
       .findOne({ flight_log_id: flight_id })
-      .populate("drone_id")
       .lean();
     return {
       code: OK.code,
